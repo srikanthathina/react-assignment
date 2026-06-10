@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: ATS Resume Screening Backend API
+  version: 1.0.0
+  description: Backend API for resume parsing, ATS scoring, candidate ranking, and recruiter analytics.
+servers:
+  - url: http://localhost:5000
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: API is healthy
+  /api/auth/register:
+    post:
+      summary: Register candidate, recruiter, or admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [candidate, recruiter, admin]
+      responses:
+        "201":
+          description: Registered successfully
+  /api/auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful
+  /api/jobs:
+    get:
+      summary: List jobs with pagination and filters
+      responses:
+        "200":
+          description: Jobs returned
+    post:
+      summary: Create a job as recruiter/admin
+      responses:
+        "201":
+          description: Job created
+  /api/resumes:
+    get:
+      summary: List authenticated user's resumes
+      responses:
+        "200":
+          description: Resumes returned
+    post:
+      summary: Upload resume PDF or DOCX
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                candidateName:
+                  type: string
+                resume:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Resume uploaded and parsed
+  /api/screenings:
+    get:
+      summary: List recruiter screenings
+      responses:
+        "200":
+          description: Screenings returned
+    post:
+      summary: Score one resume against one job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resumeId, jobId]
+              properties:
+                resumeId:
+                  type: string
+                jobId:
+                  type: string
+      responses:
+        "201":
+          description: Screening created
+  /api/dashboard/recruiter:
+    get:
+      summary: Recruiter analytics dashboard
+      responses:
+        "200":
+          description: Dashboard data returned
